@@ -5,6 +5,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 
 import Image from 'next/image';
 import { fetchImages } from '@/data/service';
+import { Header } from '@/components/Header';
 
 interface IImage {
   id: string;
@@ -29,12 +30,14 @@ const Home = () => {
   }, []);
 
   return (
+
     <InfiniteScroll
       dataLength={images.length}
       next={getMoreImages}
       hasMore={true}
       loader={<h4>Loading...</h4>}
     >
+      <Header />
       <div className="grid grid-cols-3 gap-4">
         {images.map((image) => (
           <div key={image.id}>
