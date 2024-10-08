@@ -26,11 +26,6 @@ export const Menu = () => {
     }
 
 
-
-
-
-
-
     return (
 
 
@@ -43,11 +38,11 @@ export const Menu = () => {
 
 
 
-            <button className={selectedButton === "home" ? "bg-black text-white w-32 h-10 rounded-full" : "text-black w-32 h-10 rounded-full"} onClick={() => handleButtonClick("home")}>
+            <button className={selectedButton === "home" ? "bg-black text-white w-32 h-10 rounded-full font-semibold" : "text-black w-32 h-10 rounded-full font-semibold"} onClick={() => handleButtonClick("home")}>
                 <Link href="/" >Página Inicial</Link>
             </button>
 
-            <button className={selectedButton === "criar" ? "bg-black text-white w-32 h-10 rounded-full" : "text-black w-32 h-10 rounded-full"} onClick={() => handleButtonClick("criar")}>
+            <button className={selectedButton === "criar" ? "bg-black text-white w-32 h-10 rounded-full" : "text-black font-semibold w-32 h-10 rounded-full"} onClick={() => handleButtonClick("criar")}>
                 <Link href="/criar">Criar</Link>
             </button>
         </div>
