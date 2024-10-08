@@ -5,7 +5,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 
 import Image from 'next/image';
 import { fetchImages } from '@/data/service';
-import { Header } from '@/components/Header';
+
 
 interface IImage {
   id: string;
@@ -19,9 +19,12 @@ const Home = () => {
   const [images, setImages] = useState<IImage[]>([]);
   const [page, setPage] = useState(1);
 
+
+
+
   const getMoreImages = async () => {
-    const newImages = await fetchImages(page);
-    setImages((prev) => [...prev, ...newImages]);
+    const newImages = await fetchImages(page + 1);
+    setImages([...images, ...newImages]);
     setPage(page + 1);
   };
 
@@ -31,13 +34,14 @@ const Home = () => {
 
   return (
 
-    <InfiniteScroll
+   <>
+     <InfiniteScroll
       dataLength={images.length}
       next={getMoreImages}
       hasMore={true}
       loader={<h4>Loading...</h4>}
     >
-      <Header />
+
       <div className="grid grid-cols-3 gap-4">
         {images.map((image) => (
           <div key={image.id}>
@@ -46,6 +50,7 @@ const Home = () => {
         ))}
       </div>
     </InfiniteScroll>
+   </>
   );
 };
 
