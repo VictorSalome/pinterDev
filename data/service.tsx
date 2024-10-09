@@ -16,7 +16,7 @@ export interface UnsplashImage {
 
 
 
-export const fetchImages = async (page: number = 1) => {
+export const fetchRandomImages = async (page: number = 1) => {
     const response = await axios.get(UNSPLASH_URL, {
         params: {
             client_id: process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY,
@@ -27,15 +27,20 @@ export const fetchImages = async (page: number = 1) => {
     return response.data;
 };
 
-export const fetchImagesByCategory = async (category: string, page: number = 1): Promise<UnsplashImage[]> => {
-    const response = await axios.get(UNSPLASH_URL, {
+
+
+
+export const searchImagesByName = async (query: string, page: number = 1): Promise<UnsplashImage[]> => {
+    const searchQuery = encodeURIComponent(query);
+    const response = await axios.get(`https://api.unsplash.com/search/photos?page=${page}&query=${searchQuery}`, {
         params: {
-            query: category,
             client_id: process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY,
-            page,
-            per_page: 30,
+
         },
+
     });
 
-    return response.data.results || []; // Retorna um array
+    return response.data.results || [];
+
 }
+
