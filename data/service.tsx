@@ -34,3 +34,16 @@ export const searchImagesByName = async (query: string, page: number = 1): Promi
 
 }
 
+export const viewImageByCaytegory = async (category: string, page: number = 1): Promise<IUnsplashImage[]> => {
+
+    const response = await axios.get(`https://api.unsplash.com/search/photos?page=${page}&query=${category}`, {
+        params: {
+            client_id: process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY,
+
+        },
+
+    });
+
+    return response.data.results || [];
+}
+
