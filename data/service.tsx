@@ -1,18 +1,8 @@
+import { IUnsplashImage } from '@/app/Interfaces/interfaces';
 import axios from 'axios';
 
 const UNSPLASH_URL = 'https://api.unsplash.com/photos';
-export interface UnsplashImage {
-    id: string;
-    alt_description: string;
-    urls: {
-        small: string;
-        full: string;
-    };
-    user: {
-        name: string;
-    };
-    // Adicione outros campos que precisar
-}
+
 
 
 
@@ -30,7 +20,7 @@ export const fetchRandomImages = async (page: number = 1) => {
 
 
 
-export const searchImagesByName = async (query: string, page: number = 1): Promise<UnsplashImage[]> => {
+export const searchImagesByName = async (query: string, page: number = 1): Promise<IUnsplashImage[]> => {
     const searchQuery = encodeURIComponent(query);
     const response = await axios.get(`https://api.unsplash.com/search/photos?page=${page}&query=${searchQuery}`, {
         params: {

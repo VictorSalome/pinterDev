@@ -4,18 +4,11 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import Masonry from "react-masonry-css";
 import { fetchRandomImages } from "@/data/service";
 import ImageCard from "./ImageCard";
-
-interface IImage {
-  id: string;
-  urls: {
-    small: string;
-  };
-  alt_description: string;
-}
+import { Loader } from "./Loader";
+import { IUnsplashImage } from "../Interfaces/interfaces"; // Importe a interface aqui
 
 const ImageGallery = () => {
-  const [images, setImages] = useState<IImage[]>([]);
-  console.log('images', images)
+  const [images, setImages] = useState<IUnsplashImage[]>([]);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -23,7 +16,7 @@ const ImageGallery = () => {
   }, []);
 
   const getMoreImages = async () => {
-    const newImages = await fetchRandomImages(page + 1);
+    const newImages = await fetchRandomImages(page);
     setImages((prevImages) => [...prevImages, ...newImages]);
     setPage((prevPage) => prevPage + 1);
   };
@@ -40,7 +33,7 @@ const ImageGallery = () => {
       dataLength={images.length}
       next={getMoreImages}
       hasMore={true}
-      loader={<h4>Loading...</h4>}
+      loader={<Loader />}
     >
       <Masonry
         breakpointCols={breakpointColumnsObj}
@@ -50,9 +43,7 @@ const ImageGallery = () => {
         {images.map((image) => (
           <ImageCard
             key={image.id}
-            id={image.id}
-            imageUrl={image.urls.small}
-            altDescription={image.alt_description}
+            image={image} // Passa a imagem inteira para o componente ImageCard
           />
         ))}
       </Masonry>
