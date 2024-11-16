@@ -1,14 +1,14 @@
 
+import { Suspense } from "react";
+import { Loader } from "./components/Loader";
+import { ImageGallery } from "./components/ImageGallery";
 
-import ImageGallery from "./components/ImageGallery";
-
-
-const Home = () => {
+export default function Home() {
   return (
-    <>
-      <ImageGallery />
-    </>
+    <main className="container mx-auto px-4 py-8">
+      <Suspense fallback={<Loader />}>
+        <ImageGallery />
+      </Suspense>
+    </main>
   );
-};
-
-export default Home;
+}
