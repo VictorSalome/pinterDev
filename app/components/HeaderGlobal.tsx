@@ -1,219 +1,119 @@
 "use client";
-import { TfiClose, TfiSearch } from "react-icons/tfi";
+
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import { Search, Camera, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useRouter } from 'next/navigation';
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Bell, MessageCircle, Menu, Home, Compass, FolderHeart } from "lucide-react";
-import {
-    Sheet,
-    SheetContent,
-    SheetTrigger,
-} from "@/components/ui/sheet";
-import { motion, AnimatePresence } from "framer-motion";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 
-export const HeaderGlobal = () => {
-    const [searchValue, setSearchValue] = useState("");
-    const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const pathname = usePathname();
-    const [selectedButton, setSelectedButton] = useState(pathname === "/" ? "home" : "explorar");
+export function HeaderGlobal() {
     const router = useRouter();
+    const pathname = usePathname();
+    const [searchQuery, setSearchQuery] = useState("");
+    const [isOpen, setIsOpen] = useState(false);
 
-    const handleClearSearch = () => {
-        setSearchValue("");
-    };
-
-    const handleSearch = async () => {
-        if (searchValue.trim() !== "") {
-            router.push(`/search?query=${encodeURIComponent(searchValue.trim())}`);
-            setIsSearchOpen(false);
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
         }
     };
 
-    const handleButtonClick = (button: string) => {
-        setSelectedButton(button);
-    };
-
-    useEffect(() => {
-        setSelectedButton(pathname === '/' ? 'home' : 'explorar');
-    }, [pathname]);
-
-    const NavigationLinks = () => (
-        <nav className="flex flex-col sm:flex-row gap-2">
-            <Button
-                variant={selectedButton === "home" ? "default" : "ghost"}
-                className="rounded-full w-full sm:w-auto justify-start sm:justify-center group hover:bg-primary/90 transition-all duration-300 hover:scale-105"
-                onClick={() => handleButtonClick("home")}
-                asChild
-            >
-                <Link href="/" className="flex items-center gap-2">
-                    <Home className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                    <span className="font-medium">Página Inicial</span>
-                </Link>
-            </Button>
-            <Button
-                variant={selectedButton === "explorar" ? "default" : "ghost"}
-                className="rounded-full w-full sm:w-auto justify-start sm:justify-center group hover:bg-primary/90 transition-all duration-300 hover:scale-105"
-                onClick={() => handleButtonClick("explorar")}
-                asChild
-            >
-                <Link href="/explorar" className="flex items-center gap-2">
-                    <Compass className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                    <span className="font-medium">Explorar</span>
-                </Link>
-            </Button>
-            <Button
-                variant={selectedButton === "collections" ? "default" : "ghost"}
-                className="rounded-full w-full sm:w-auto justify-start sm:justify-center group hover:bg-primary/90 transition-all duration-300 hover:scale-105"
-                onClick={() => handleButtonClick("collections")}
-                asChild
-            >
-                <Link href="/collections" className="flex items-center gap-2">
-                    <FolderHeart className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                    <span className="font-medium">Coleções</span>
-                </Link>
-            </Button>
-        </nav>
-    );
-
     return (
-        <motion.header
-            initial={{ y: -100 }}
-            animate={{ y: 0 }}
-            transition={{ type: "spring", stiffness: 100 }}
-            className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
-        >
-            <div className="container flex h-16 items-center justify-between px-4">
-                <div className="flex items-center gap-4">
-                    {/* Mobile Menu */}
-                    <Sheet>
-                        <SheetTrigger asChild>
-                            <Button variant="ghost" size="icon" className="sm:hidden hover:bg-primary/10 transition-colors duration-300">
-                                <Menu className="h-5 w-5" />
-                            </Button>
-                        </SheetTrigger>
-                        <SheetContent side="left" className="w-[240px] sm:hidden">
-                            <div className="mt-6">
-                                <NavigationLinks />
-                            </div>
-                        </SheetContent>
-                    </Sheet>
+        <>
+            <div className="h-16" />
+            
+            <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md shadow-sm z-50">
+                <div className="container h-full">
+                    <div className="flex h-16 items-center justify-between gap-2">
+                        <div className="flex items-center gap-3">
+                            <Link href="/" className="flex items-center transition-transform hover:scale-110">
+                                <Camera className="h-8 w-8 text-red-600" />
+                            </Link>
 
-                    {/* Logo */}
-                    <Link href="/">
-                        <motion.svg
-                            whileHover={{ scale: 1.1, rotate: 5 }}
-                            whileTap={{ scale: 0.95 }}
-                            aria-label="Pinterest"
-                            className="transition-all duration-300"
-                            fill="#e60023"
-                            height="40"
-                            role="img"
-                            viewBox="0 0 24 24"
-                            width="40"
-                        >
-                            <path d="M7.55 23.12c-.15-1.36-.04-2.67.25-3.93L9 14.02a7 7 0 0 1-.34-2.07c0-1.68.8-2.88 2.08-2.88.88 0 1.53.62 1.53 1.8q0 .57-.22 1.28l-.53 1.73q-.15.5-.15.91c0 1.2.92 1.88 2.09 1.88 2.08 0 3.57-2.16 3.57-4.96 0-3.12-2.04-5.11-5.06-5.11-3.36 0-5.49 2.19-5.49 5.23 0 1.23.38 2.37 1.11 3.15-.24.4-.5.48-.88.48-1.2 0-2.34-1.7-2.34-4 0-3.99 3.2-7.16 7.68-7.16 4.7 0 7.66 3.28 7.66 7.33 0 4.07-2.88 7.13-5.98 7.13a3.8 3.8 0 0 1-3.07-1.47l-.61 2.5c-.33 1.28-.83 2.5-1.62 3.67A12 12 0 0 0 24 11.99 12 12 0 1 0 7.55 23.12"></path>
-                        </motion.svg>
-                    </Link>
-
-                    {/* Desktop Navigation */}
-                    <div className="hidden sm:block">
-                        <NavigationLinks />
-                    </div>
-                </div>
-
-                {/* Search Bar */}
-                <div className={`flex-1 max-w-2xl mx-4 ${isSearchOpen ? 'fixed inset-0 bg-background/95 p-4 z-50 sm:relative sm:bg-transparent sm:p-0' : ''}`}>
-                    <div className="relative">
-                        {!isSearchOpen && (
                             <Button
                                 variant="ghost"
-                                size="icon"
-                                className="sm:hidden absolute left-0 top-1/2 -translate-y-1/2 hover:bg-primary/10 transition-all duration-300"
-                                onClick={() => setIsSearchOpen(true)}
+                                className={cn(
+                                    "rounded-full font-semibold hidden md:flex transition-all",
+                                    pathname === "/" ? "bg-black text-white hover:bg-black/90" : "hover:bg-gray-100"
+                                )}
+                                onClick={() => router.push("/")}
                             >
-                                <TfiSearch className="h-5 w-5" />
+                                Início
                             </Button>
-                        )}
-                        <AnimatePresence>
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                                className={`${isSearchOpen ? 'flex' : 'hidden sm:block'}`}
+
+                            <Button
+                                variant="ghost"
+                                className={cn(
+                                    "rounded-full font-semibold hidden md:flex transition-all",
+                                    pathname === "/explorar" ? "bg-black text-white hover:bg-black/90" : "hover:bg-gray-100"
+                                )}
+                                onClick={() => router.push("/explorar")}
                             >
-                                <TfiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                                Explorar
+                            </Button>
+                        </div>
+
+                        <form onSubmit={handleSearch} className="flex-1 max-w-2xl mx-auto px-4">
+                            <div className="relative group">
+                                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 transition-colors group-hover:text-gray-700" />
                                 <Input
                                     type="search"
-                                    placeholder="O que você está procurando?"
-                                    className="w-full pl-10 pr-10 rounded-full bg-secondary/80 hover:bg-secondary/90 focus:bg-background border-none shadow-none ring-1 ring-border/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300 [&:not(:placeholder-shown)]:scale-105 hover:shadow-md [&::-webkit-search-cancel-button]:hidden outline-none"
-                                    value={searchValue}
-                                    onChange={(e) => setSearchValue(e.target.value)}
-                                    onKeyUp={(e) => {
-                                        if (e.key === 'Enter') {
-                                            handleSearch();
-                                        }
-                                    }}
+                                    placeholder="Pesquisar imagens..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full pl-10 bg-gray-100 rounded-full border-none transition-all 
+                                    focus-visible:ring-1 focus-visible:ring-gray-400 focus-visible:ring-offset-0
+                                    hover:bg-gray-200/70"
                                 />
+                            </div>
+                        </form>
 
-                                {searchValue && (
-                                    <motion.div
-                                        initial={{ scale: 0 }}
-                                        animate={{ scale: 1 }}
-                                        exit={{ scale: 0 }}
+                        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+                            <SheetTrigger asChild>
+                                <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="rounded-full md:hidden hover:bg-gray-100 transition-colors"
+                                >
+                                    <Menu className="h-5 w-5" />
+                                </Button>
+                            </SheetTrigger>
+                            <SheetContent side="right" className="w-[280px] sm:w-[320px] border-l bg-white/95 backdrop-blur-md">
+                                <nav className="flex flex-col gap-4 mt-8">
+                                    <Link
+                                        href="/"
+                                        className={cn(
+                                            "px-4 py-2 rounded-lg transition-colors",
+                                            pathname === "/" 
+                                                ? "bg-black text-white" 
+                                                : "text-gray-600 hover:bg-gray-100"
+                                        )}
+                                        onClick={() => setIsOpen(false)}
                                     >
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="absolute right-2 top-1/2 -translate-y-1/2 hover:bg-secondary/80 transition-all duration-300"
-                                            onClick={handleClearSearch}
-                                        >
-                                            <TfiClose className="h-4 w-4" />
-                                        </Button>
-                                    </motion.div>
-                                )}
-                            </motion.div>
-                        </AnimatePresence>
+                                        Início
+                                    </Link>
+                                    <Link
+                                        href="/explorar"
+                                        className={cn(
+                                            "px-4 py-2 rounded-lg transition-colors",
+                                            pathname === "/explorar" 
+                                                ? "bg-black text-white" 
+                                                : "text-gray-600 hover:bg-gray-100"
+                                        )}
+                                        onClick={() => setIsOpen(false)}
+                                    >
+                                        Explorar
+                                    </Link>
+                                </nav>
+                            </SheetContent>
+                        </Sheet>
                     </div>
                 </div>
-
-                {/* User Actions */}
-                <div className="flex items-center gap-4 px-2">
-                    <motion.div whileHover={{ scale: 1.1 }}>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="rounded-full hidden sm:flex hover:bg-primary/10 group transition-all duration-300"
-                            title="Notificações"
-                        >
-                            <Bell className="h-5 w-5 text-muted-foreground group-hover:scale-110 transition-transform" />
-                        </Button>
-                    </motion.div>
-                    <motion.div whileHover={{ scale: 1.1 }}>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="rounded-full hidden sm:flex hover:bg-primary/10 group transition-all duration-300"
-                            title="Mensagens"
-                        >
-                            <MessageCircle className="h-5 w-5 text-muted-foreground group-hover:scale-110 transition-transform" />
-                        </Button>
-                    </motion.div>
-                    <motion.div
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                    >
-                        <Avatar className="h-9 w-9 cursor-pointer hover:ring-2 ring-muted transition-all duration-300 hover:shadow-lg">
-                            <AvatarFallback>V</AvatarFallback>
-                        </Avatar>
-                    </motion.div>
-                </div>
-            </div>
-        </motion.header>
+            </header>
+        </>
     );
-};
+}

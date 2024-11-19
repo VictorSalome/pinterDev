@@ -1,4 +1,5 @@
 export interface IUnsplashImage {
+  downloads: number;
   id: string;
   slug: string;
   alternative_slugs: AlternativeSlugs;
@@ -21,6 +22,8 @@ export interface IUnsplashImage {
   topic_submissions: TopicSubmissions;
   asset_type: string;
   user: User;
+  views?: number;
+  tags?: Array<{ title: string }>;
 }
 
 export interface AlternativeSlugs {

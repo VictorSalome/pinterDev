@@ -1,96 +1,103 @@
-"use client";
+'use client';
 
-import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { HeaderGlobal } from "../components/HeaderGlobal";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { IUnsplashImage } from "../Interfaces/interfaces";
 import { ImageCard } from "../components/ImageCard";
 import { useInView } from "react-intersection-observer";
-import { Suspense } from 'react';
+import { LoadingSpinner } from "../components/LoadingSpinner";
 
 function SearchContent() {
-    const searchParams = useSearchParams();
-    const query = searchParams.get("q");
-    const [images, setImages] = useState<IUnsplashImage[]>([]);
-    const [loading, setLoading] = useState(false);
-    const { ref, inView } = useInView();
-    const [page, setPage] = useState(1);
+  const [images, setImages] = useState<IUnsplashImage[]>([]);
+  const [loading, setLoading] = useState(false);
+  const { ref, inView } = useInView();
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [query, setQuery] = useState('');
 
-    const handleInitialSearch = useCallback(async () => {
-        if (!query) return;
-        try {
-            setLoading(true);
-            const response = await fetch(
-                `https://api.unsplash.com/search/photos?query=${query}&page=1&per_page=30&client_id=${process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY}`
-            );
-            const data = await response.json();
-            setImages(data.results);
-            setPage(2);
-        } catch (err) {
-            console.error("Erro na busca:", err);
-        } finally {
-            setLoading(false);
+  const searchImages = useCallback(async () => {
+    if (loading || !query) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await fetch(
+        `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&page=${page}&per_page=30&client_id=${process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY}`,
+        {
+          headers: {
+            'Authorization': `Client-ID ${process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY}`,
+            'Accept-Version': 'v1',
+            'Content-Type': 'application/json',
+          }
         }
-    }, [query]);
+      );
 
-    const fetchMoreImages = useCallback(async () => {
-        if (!query) return;
-        try {
-            setLoading(true);
-            const response = await fetch(
-                `https://api.unsplash.com/search/photos?query=${query}&page=${page}&per_page=30&client_id=${process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY}`
-            );
-            const data = await response.json();
-            setImages((prev) => [...prev, ...data.results]);
-            setPage((prev) => prev + 1);
-        } catch (err) {
-            console.error("Erro ao carregar mais imagens:", err);
-        } finally {
-            setLoading(false);
-        }
-    }, [query, page]);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-    useEffect(() => {
-        handleInitialSearch();
-    }, [handleInitialSearch]);
+      const data = await response.json();
+      
+      const newImages = data.results.filter((newImage: IUnsplashImage) => 
+        !images.some(existingImage => existingImage.id === newImage.id)
+      );
 
-    useEffect(() => {
-        if (inView && !loading) {
-            fetchMoreImages();
-        }
-    }, [inView, loading, fetchMoreImages]);
+      setImages(prev => [...prev, ...newImages]);
+      setPage(prev => prev + 1);
+    } catch (err) {
+      console.error("Erro ao pesquisar imagens:", err);
+      setError("Falha ao carregar as imagens. Tente novamente mais tarde.");
+    } finally {
+      setLoading(false);
+    }
+  }, [loading, page, query, images]);
 
-    return (
-        <main className="min-h-screen bg-white">
-            <HeaderGlobal />
-            <div className="container mx-auto px-4 py-8">
-                <h1 className="text-2xl font-bold mb-6">
-                    Resultados para: {query}
-                </h1>
-                <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4">
-                    {images.map((image) => (
-                        <div key={image.id} className="mb-4 break-inside-avoid">
-                            <ImageCard image={image} />
-                        </div>
-                    ))}
-                </div>
-                {loading && (
-                    <div className="flex justify-center items-center h-24">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-                    </div>
-                )}
-                <div ref={ref} className="h-10" />
-            </div>
-        </main>
-    );
+  useEffect(() => {
+    if (inView && !loading && query) {
+      searchImages();
+    }
+  }, [inView, loading, searchImages, query]);
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => {
+          setQuery(e.target.value);
+          setImages([]);
+          setPage(1);
+        }}
+        placeholder="Pesquisar imagens..."
+        className="w-full p-2 border rounded-lg mb-8"
+      />
+
+      {error && (
+        <div className="text-red-500 text-center my-4">
+          {error}
+        </div>
+      )}
+
+      <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4">
+        {images.map((image, index) => (
+          <div key={`${image.id}-${index}`} className="mb-4 break-inside-avoid">
+            <ImageCard image={image} />
+          </div>
+        ))}
+      </div>
+
+      {loading && <LoadingSpinner />}
+      <div ref={ref} className="h-10" />
+    </div>
+  );
 }
 
 export default function Search() {
-    return (
-        <Suspense fallback={<div className="flex justify-center items-center h-24">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-        </div>}>
-            <SearchContent />
-        </Suspense>
-    );
+  return (
+    <main className="min-h-screen bg-white">
+      <Suspense fallback={<LoadingSpinner />}>
+        <SearchContent />
+      </Suspense>
+    </main>
+  );
 }
